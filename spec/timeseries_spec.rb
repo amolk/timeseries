@@ -164,6 +164,31 @@ describe Timeseries do
 
     end
 
+    context "cached value fields" do
+      before do
+        @timeseries << [Time.utc(2000, 1, 1, 1), 100]
+        @timeseries << [Time.utc(2000, 1, 1, 4), 1000]
+        @timeseries << [Time.utc(2000, 1, 1, 5), 1000]
+        @timeseries << [Time.utc(2000, 1, 1, 6), 1000]
+        @timeseries.save
+        @stock = Stock.first
+      end
+
+      it "*_first_time" do
+        @stock.price_first_time.should == Time.utc(2000, 1, 1, 1)
+      end
+      it "*_first_value" do
+        @stock.price_first_value.should == 100
+      end
+
+      it "*_current_time" do
+        @stock.price_current_time.should == Time.utc(2000, 1, 1, 6)
+      end
+      it "*_current_value" do
+        @stock.price_current_value.should == 1000
+      end
+    end
+
   end
 
 end

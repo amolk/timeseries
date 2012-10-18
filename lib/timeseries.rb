@@ -142,6 +142,14 @@ module Timeseries
       end
 
       self.last = item
+      if chronological.send("#{self.name}_first_time") == nil
+        chronological.send("#{self.name}_first_time=", item[0])
+        chronological.send("#{self.name}_first_value=", item[1])
+      end
+
+      chronological.send("#{self.name}_current_time=", item[0])
+      chronological.send("#{self.name}_current_value=", item[1])
+      chronological.save
     end
 
     def query(params)
@@ -174,7 +182,13 @@ module Timeseries
   module ClassMethods
     def timeseries(list)
       many :timeseries, order: :_id, class_name: 'Timeseries::Timeseries', as: 'chronological', dependent: :destroy
-      # field name, type: Timeseries, default: -> {Timeseries.new(name, config)}
+
+      list.each{|item|
+        key "#{item[:name]}_first_value", Integer
+        key "#{item[:name]}_first_time", Time
+        key "#{item[:name]}_current_value", Integer
+        key "#{item[:name]}_current_time", Time
+      }
 
       after_create lambda {create_timeseries(list)}
     end
