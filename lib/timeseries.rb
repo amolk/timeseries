@@ -154,8 +154,8 @@ module Timeseries
 
     def query(params)
       resolution = DAY
-      if (params[:r] != nil)
-        resolution = Integer(params[:r])
+      if (params[:resolution] != nil)
+        resolution = Integer(params[:resolution])
       end
 
       self.series[resolution].items.as_json
