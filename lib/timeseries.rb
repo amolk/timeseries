@@ -8,6 +8,7 @@ module Timeseries
   MONTH = 2
   WEEK = 3
   DAY = 4
+  MAX_RESOLUTION = DAY
 
   class ResolutionProcessorYear
     def self.interval
@@ -107,6 +108,12 @@ module Timeseries
     end
 
     def << (item)
+      append(item, nil)
+    end
+
+    def append(item, owner)
+      owner ||= chronological
+
       if (self.last && self.last[0] && self.last[0] >= item[0])
         raise "Add time series items in chronological order"
       end
@@ -142,21 +149,18 @@ module Timeseries
       end
 
       self.last = item
-      if chronological.send("#{self.name}_first_time") == nil
-        chronological.send("#{self.name}_first_time=", item[0])
-        chronological.send("#{self.name}_first_value=", item[1])
+      if owner.send("#{self.name}_first_time") == nil
+        owner.send("#{self.name}_first_time=", item[0])
+        owner.send("#{self.name}_first_value=", item[1])
       end
 
-      chronological.send("#{self.name}_current_time=", item[0])
-      chronological.send("#{self.name}_current_value=", item[1])
-      chronological.save
+      owner.send("#{self.name}_current_time=", item[0])
+      owner.send("#{self.name}_current_value=", item[1])
     end
 
     def query(params)
-      resolution = DAY
-      if (params[:resolution] != nil)
-        resolution = Integer(params[:resolution])
-      end
+      resolution = Integer(params[:resolution]) 
+      resolution = DAY if resolution < RAW || resolution > MAX_RESOLUTION
 
       self.series[resolution].items.as_json
     end
