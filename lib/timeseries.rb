@@ -106,6 +106,20 @@ module Timeseries
         }
       end
     end
+    
+    def refresh_from_raw
+      items = self.series[RAW].items
+      self.series = nil
+      self.last = nil
+      create_series
+      c = chronological
+
+      items.each{|item|
+        self.append item, c
+      }
+
+      c.save!
+    end
 
     def << (item)
       append(item, nil)
@@ -119,6 +133,11 @@ module Timeseries
       end
 
       self.series[RAW].items << item
+
+      # if value unchanged from last record, skip adding to other series
+      if (self.last && self.last[1] == item[1])
+        return
+      end
 
       # find out boundary and see if the new item crossed the boundary
       if (self.last && self.last[0]) 
