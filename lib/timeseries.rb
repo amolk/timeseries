@@ -181,7 +181,9 @@ module Timeseries
       resolution = Integer(params[:resolution]) 
       resolution = DAY if resolution < RAW || resolution > MAX_RESOLUTION
 
-      self.series[resolution].items.as_json
+      items = self.series[resolution].items
+      items = [self.series[RAW].items[0]] if items.length == 0 && self.series[RAW].items.length != 0
+      items.as_json
     end
 
     def as_full_json
