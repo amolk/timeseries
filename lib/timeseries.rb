@@ -107,6 +107,11 @@ module Timeseries
       end
     end
     
+    def clear
+      self.series[RAW].items = []
+      self.refresh_from_raw
+    end
+    
     def refresh_from_raw
       items = self.series[RAW].items
       self.series = nil
